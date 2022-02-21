@@ -10,7 +10,6 @@ using std::sort;
 using std::vector;
 using std::reverse;
 
-#define NOTEST
 
 RoutePlanner::RoutePlanner(RouteModel &model, float start_x, float start_y, float end_x, float end_y): m_Model(model) {
     // Convert inputs to percentage:
@@ -21,17 +20,9 @@ RoutePlanner::RoutePlanner(RouteModel &model, float start_x, float start_y, floa
 
     // TODO 2: Use the m_Model.FindClosestNode method to find the closest nodes to the starting and ending coordinates.
     // Store the nodes you find in the RoutePlanner's start_node and end_node attributes.
-    //RouteModel::Node start_node = model.FindClosestNode(start_x, start_y);
-    //RouteModel::Node end_node = model.FindClosestNode(end_x, end_y);
 
-    this->start_node = &m_Model.FindClosestNode(start_x, start_y);
-    this->end_node = &m_Model.FindClosestNode(end_x, end_y);
-
-#ifndef NOTEST    
-    cout << "Start Node: " << start_node->x << " " << start_node->y << "\n";
-    cout << "  End Node: " << end_node->x << " " << end_node->y << "\n";
-#endif
-
+    this->start_node = &(m_Model.FindClosestNode(start_x, start_y));
+    this->end_node = &(m_Model.FindClosestNode(end_x, end_y));
 }
 
 
@@ -41,16 +32,7 @@ RoutePlanner::RoutePlanner(RouteModel &model, float start_x, float start_y, floa
 // - Node objects have a distance method to determine the distance to another node.
 
 float RoutePlanner::CalculateHValue(RouteModel::Node const *node) {
-
-
-    float distance = node->distance(*end_node);
-
-#ifndef NOTEST    
-    cout << "Route Planner Distance: " << distance << "\n";
-#endif
-
-    return distance;
-
+    return node->distance(*end_node);
 }
 
 
@@ -69,7 +51,8 @@ void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
         n->h_value = CalculateHValue(n);
         n->g_value = current_node->g_value + n->distance(*current_node);
 
-        open_list.push_back(n);
+        //open_list.push_back(n);
+        open_list.emplace_back(n);
         n->visited = true;
     }
 }
@@ -83,10 +66,8 @@ void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
 // - Return the pointer.
 
 bool CompareNodes(RouteModel::Node *n1, RouteModel::Node *n2) {
-   float f1 = n1->h_value + n1->g_value;
-   float f2 = n2->h_value + n2->g_value; 
 
-   return f1 > f2;
+   return (n1->h_value + n1->g_value) > (n2->h_value + n2->g_value);
 }
 
 RouteModel::Node *RoutePlanner::NextNode() {
